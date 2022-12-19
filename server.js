@@ -8,14 +8,17 @@ const port = process.env.PORT || 3000;
 
 let redisClient;
 
+// Connecting to redis server
 (async () => {
     redisClient = redis.createClient();
 
+    // if gets error while connection to redis server
     redisClient.on("error", (error) => console.error(`Error : ${error}`));
 
     await redisClient.connect();
 })();
 
+// Retrieving Data From a RESTful API
 async function fetchApiData(species) {
     const apiResponse = await axios.get(
         `https://www.fishwatch.gov/api/species/${species}`
@@ -24,6 +27,7 @@ async function fetchApiData(species) {
     return apiResponse.data;
 }
 
+// Caching Data in Middleware
 async function cacheData(req, res, next) {
     const species = req.params.species;
     let results;
@@ -67,8 +71,10 @@ async function getSpeciesData(req, res) {
     }
 }
 
+// :species that captures anything entered on that position in the URL
 app.get("/fish/:species", cacheData, getSpeciesData);
 
+// start the server on port 3000
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);
 });
